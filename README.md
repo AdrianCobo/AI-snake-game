@@ -11,3 +11,6 @@ conda create -n pygame_env python=3.7
 conda activate pygame_env
 pip install pygame
 pip install torch torchvision
+
+Start training:
+python agent.py
