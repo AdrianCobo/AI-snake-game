@@ -6,9 +6,9 @@ from snake_game_ai import SnakeGameAI, Direction, Point
 from model import Linear_QNet, QTrainer
 from helper import plot
 
-MAX_MEMORY = 100_000
-BATCH_SIZE = 1000
-LR = 0.001
+MAX_MEMORY = 150_000
+BATCH_SIZE = 2500
+LR = 0.002
 BLOCK_SIZE = 20
 
 
@@ -19,7 +19,7 @@ class Agent:
         self.gamma = 0.9  # discount rate (must be between 0 and 1)
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft()
         self.model = Linear_QNet(
-            11, 256, 3
+            20, 1000, 3
         )  # 11 parametoros de entrada y 3 de salida. con las capas ocultas si puedes jugar
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
@@ -30,23 +30,83 @@ class Agent:
         point_u = Point(head.x, head.y - BLOCK_SIZE)
         point_d = Point(head.x, head.y + BLOCK_SIZE)
 
+        point_l2 = Point(head.x - BLOCK_SIZE * 2, head.y)
+        point_r2 = Point(head.x + BLOCK_SIZE * 2, head.y)
+        point_u2 = Point(head.x, head.y - BLOCK_SIZE * 2)
+        point_d2 = Point(head.x, head.y + BLOCK_SIZE * 2)
+
+        point_l3 = Point(head.x - BLOCK_SIZE * 3, head.y)
+        point_r3 = Point(head.x + BLOCK_SIZE * 3, head.y)
+        point_u3 = Point(head.x, head.y - BLOCK_SIZE * 3)
+        point_d3 = Point(head.x, head.y + BLOCK_SIZE * 3)
+
+        point_l4 = Point(head.x - BLOCK_SIZE * 4, head.y)
+        point_r4 = Point(head.x + BLOCK_SIZE * 4, head.y)
+        point_u4 = Point(head.x, head.y - BLOCK_SIZE * 4)
+        point_d4 = Point(head.x, head.y + BLOCK_SIZE * 4)
+
         dir_l = game.direction == Direction.LEFT
         dir_r = game.direction == Direction.RIGHT
         dir_u = game.direction == Direction.UP
         dir_d = game.direction == Direction.DOWN
 
         state = [
-            # Danger straight
+            # Danger straight 4 blocks
+            (dir_r and game.is_collision(point_r4))
+            or (dir_l and game.is_collision(point_l4))
+            or (dir_u and game.is_collision(point_u4))
+            or (dir_d and game.is_collision(point_d4)),
+            # Danger right 4 blocks
+            (dir_u and game.is_collision(point_r4))
+            or (dir_d and game.is_collision(point_l4))
+            or (dir_l and game.is_collision(point_u4))
+            or (dir_r and game.is_collision(point_d4)),
+            # Danger left 4 blocks
+            (dir_d and game.is_collision(point_r4))
+            or (dir_u and game.is_collision(point_l4))
+            or (dir_r and game.is_collision(point_u4))
+            or (dir_l and game.is_collision(point_d4)),
+            # Danger straight 3 blocks
+            (dir_r and game.is_collision(point_r3))
+            or (dir_l and game.is_collision(point_l3))
+            or (dir_u and game.is_collision(point_u3))
+            or (dir_d and game.is_collision(point_d3)),
+            # Danger right 3 blocks
+            (dir_u and game.is_collision(point_r3))
+            or (dir_d and game.is_collision(point_l3))
+            or (dir_l and game.is_collision(point_u3))
+            or (dir_r and game.is_collision(point_d3)),
+            # Danger left 3 blocks
+            (dir_d and game.is_collision(point_r3))
+            or (dir_u and game.is_collision(point_l3))
+            or (dir_r and game.is_collision(point_u3))
+            or (dir_l and game.is_collision(point_d3)),
+            # Danger straight 2 blocks
+            (dir_r and game.is_collision(point_r2))
+            or (dir_l and game.is_collision(point_l2))
+            or (dir_u and game.is_collision(point_u2))
+            or (dir_d and game.is_collision(point_d2)),
+            # Danger right 2 blocks
+            (dir_u and game.is_collision(point_r2))
+            or (dir_d and game.is_collision(point_l2))
+            or (dir_l and game.is_collision(point_u2))
+            or (dir_r and game.is_collision(point_d2)),
+            # Danger left 2 blocks
+            (dir_d and game.is_collision(point_r2))
+            or (dir_u and game.is_collision(point_l2))
+            or (dir_r and game.is_collision(point_u2))
+            or (dir_l and game.is_collision(point_d2)),
+            # Danger straight 1 block
             (dir_r and game.is_collision(point_r))
             or (dir_l and game.is_collision(point_l))
             or (dir_u and game.is_collision(point_u))
             or (dir_d and game.is_collision(point_d)),
-            # Danger right
+            # Danger right 1 block
             (dir_u and game.is_collision(point_r))
             or (dir_d and game.is_collision(point_l))
             or (dir_l and game.is_collision(point_u))
             or (dir_r and game.is_collision(point_d)),
-            # Danger left
+            # Danger left 1 block
             (dir_d and game.is_collision(point_r))
             or (dir_u and game.is_collision(point_l))
             or (dir_r and game.is_collision(point_u))
